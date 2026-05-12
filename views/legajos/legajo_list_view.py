@@ -1,5 +1,9 @@
 import flet as ft
+import httpx
+
 from views.legajos.legajo_modal import ModalLegajo
+from views.view_messages import Toast
+
 
 class LegajosView(ft.Container):
 
@@ -8,20 +12,26 @@ class LegajosView(ft.Container):
         super().__init__()
 
         self.page_ref = page
+
         self.modal_legajo = ModalLegajo(page)
+
+        self.toast = Toast()
+
         # =====================================
         # ESTADO
         # =====================================
 
         self.current_page = 1
+
         self.page_size = 10
+
         self.total_items = 0
 
         # =====================================
-        # DATA MOCK
+        # DATA
         # =====================================
 
-        self.legajos = self.mock_data()
+        self.legajos = []
 
         # =====================================
         # CONFIG GENERAL
@@ -31,7 +41,7 @@ class LegajosView(ft.Container):
 
         self.bgcolor = "#F1F5F9"
 
-        self.padding = 25
+        self.padding = 6
 
         # =====================================
         # FILTROS
@@ -39,28 +49,33 @@ class LegajosView(ft.Container):
 
         self.txt_busqueda = ft.TextField(
 
-            hint_text="Buscar por DNI, apellido o nombre",
+            hint_text="Buscar por CUIL, apellido o nombre",
 
             prefix_icon=ft.Icons.SEARCH,
 
-            border_radius=8,
+            border_radius=6,
 
             filled=True,
 
             bgcolor="white",
-           
+
             border_color="#CBD5E1",
 
             expand=True,
 
-            height=44
+            height=36,
+
+            text_size=12,
+
+            content_padding=10
         )
 
         self.chk_activos = ft.Checkbox(
             label="Solo activos",
             value=True,
             active_color="#030813",
-            check_color="white"
+            check_color="white",
+            scale=0.9
         )
 
         # =====================================
@@ -71,11 +86,17 @@ class LegajosView(ft.Container):
 
             expand=True,
 
+            column_spacing=18,
+
+            horizontal_margin=10,
+
+            heading_row_height=36,
+
+            data_row_min_height=40,
+
+            data_row_max_height=40,
+
             heading_row_color="#E2E8F0",
-
-            data_row_min_height=58,
-
-            data_row_max_height=58,
 
             border=ft.Border.all(
                 1,
@@ -93,24 +114,24 @@ class LegajosView(ft.Container):
             ),
 
             heading_text_style=ft.TextStyle(
-                size=13,
+                size=11,
                 weight=ft.FontWeight.BOLD,
                 color="#0F172A"
             ),
 
             columns=[
 
-                ft.DataColumn(ft.Text("Legajo")),
+                ft.DataColumn(ft.Text("Cuil", size=11)),
 
-                ft.DataColumn(ft.Text("DNI")),
+                ft.DataColumn(ft.Text("Apellido", size=11)),
 
-                ft.DataColumn(ft.Text("Apellido")),
+                ft.DataColumn(ft.Text("Nombre", size=11)),
+              
+                ft.DataColumn(ft.Text("Telefono", size=11)),
 
-                ft.DataColumn(ft.Text("Nombre")),
+                ft.DataColumn(ft.Text("Estado", size=11)),
 
-                ft.DataColumn(ft.Text("Estado")),
-
-                ft.DataColumn(ft.Text("Acciones"))
+                ft.DataColumn(ft.Text("Acciones", size=11))
             ],
 
             rows=[]
@@ -122,25 +143,25 @@ class LegajosView(ft.Container):
 
         self.lbl_total = ft.Text(
             "Total: 0",
-            size=13,
+            size=11,
             color="#64748B"
         )
 
         self.lbl_page = ft.Text(
             "",
-            size=13,
+            size=11,
             color="#475569"
         )
 
         # =====================================
-        # CONTENIDO PRINCIPAL
+        # CONTENIDO
         # =====================================
 
-        self.content = ft.Column(
+        contenido = ft.Column(
 
             expand=True,
 
-            spacing=20,
+            spacing=10,
 
             controls=[
 
@@ -156,20 +177,20 @@ class LegajosView(ft.Container):
 
                         ft.Column(
 
-                            spacing=2,
+                            spacing=1,
 
                             controls=[
 
                                 ft.Text(
                                     "Legajos",
-                                    size=30,
+                                    size=18,
                                     weight=ft.FontWeight.BOLD,
                                     color="#0F172A"
                                 ),
 
                                 ft.Text(
                                     "Administración de personal",
-                                    size=14,
+                                    size=11,
                                     color="#64748B"
                                 )
                             ]
@@ -180,13 +201,17 @@ class LegajosView(ft.Container):
                             "Nuevo Legajo",
 
                             icon=ft.Icons.ADD,
+
+                            height=36,
+
                             on_click=self.modal_legajo.abrir_nuevo,
+
                             style=ft.ButtonStyle(
                                 shape=ft.RoundedRectangleBorder(
                                     radius=0
                                 ),
                                 bgcolor="#030B16",
-                                padding=20
+                                padding=12
                             )
                         )
                     ]
@@ -202,7 +227,7 @@ class LegajosView(ft.Container):
 
                     border_radius=0,
 
-                    padding=20,
+                    padding=10,
 
                     border=ft.Border.all(
                         1,
@@ -211,7 +236,7 @@ class LegajosView(ft.Container):
 
                     content=ft.Row(
 
-                        spacing=15,
+                        spacing=10,
 
                         controls=[
 
@@ -225,13 +250,14 @@ class LegajosView(ft.Container):
 
                                 icon=ft.Icons.SEARCH,
 
-                                height=44,
+                                height=36,
 
                                 style=ft.ButtonStyle(
                                     shape=ft.RoundedRectangleBorder(
                                         radius=0
                                     ),
                                     bgcolor="#030B16",
+                                    padding=10
                                 ),
 
                                 on_click=self.buscar
@@ -257,13 +283,13 @@ class LegajosView(ft.Container):
                         "#E2E8F0"
                     ),
 
-                    padding=20,
+                    padding=10,
 
                     content=ft.Column(
 
                         expand=True,
 
-                        spacing=15,
+                        spacing=8,
 
                         controls=[
 
@@ -275,7 +301,7 @@ class LegajosView(ft.Container):
 
                                     ft.Text(
                                         "Listado de Legajos",
-                                        size=18,
+                                        size=13,
                                         weight=ft.FontWeight.BOLD,
                                         color="#0F172A"
                                     ),
@@ -304,12 +330,13 @@ class LegajosView(ft.Container):
 
                                 alignment=ft.MainAxisAlignment.END,
 
-                                spacing=5,
+                                spacing=2,
 
                                 controls=[
 
                                     ft.IconButton(
                                         icon=ft.Icons.CHEVRON_LEFT,
+                                        icon_size=18,
                                         on_click=self.prev_page
                                     ),
 
@@ -317,6 +344,7 @@ class LegajosView(ft.Container):
 
                                     ft.IconButton(
                                         icon=ft.Icons.CHEVRON_RIGHT,
+                                        icon_size=18,
                                         on_click=self.next_page
                                     )
                                 ]
@@ -327,32 +355,27 @@ class LegajosView(ft.Container):
             ]
         )
 
-        self.load_data()
+        # =====================================
+        # STACK
+        # =====================================
 
-    # =====================================
-    # MOCK DATA
-    # =====================================
+        self.content = ft.Stack(
 
-    def mock_data(self):
+            expand=True,
 
-        data = []
+            controls=[
 
-        for i in range(1, 53):
+                contenido,
 
-            data.append({
+                self.toast
+            ]
+        )
 
-                "legajo": i,
+        # =====================================
+        # CARGAR DATOS
+        # =====================================
 
-                "dni": f"30{i:06}",
-
-                "apellido": f"González {i}",
-
-                "nombre": f"Juan {i}",
-
-                "activo": i % 2 == 0
-            })
-
-        return data
+        page.run_task(self.listar_legajos)
 
     # =====================================
     # LOAD DATA
@@ -374,7 +397,7 @@ class LegajosView(ft.Container):
 
             if (
 
-                filtro in x["dni"].lower()
+                filtro in str(x["cuil"]).lower()
 
                 or filtro in x["apellido"].lower()
 
@@ -415,32 +438,33 @@ class LegajosView(ft.Container):
 
                     cells=[
 
-                        # LEGAJO
-
                         ft.DataCell(
-                            ft.Text(str(item["legajo"]))
+                            ft.Text(
+                                str(item["cuil"]),
+                                size=11
+                            )
                         ),
 
-                        # DNI
 
                         ft.DataCell(
-                            ft.Text(item["dni"])
+                            ft.Text(
+                                item["apellido"],
+                                size=11
+                            )
                         ),
-
-                        # APELLIDO
 
                         ft.DataCell(
-                            ft.Text(item["apellido"])
+                            ft.Text(
+                                item["nombre"],
+                                size=11
+                            )
                         ),
-
-                        # NOMBRE
-
                         ft.DataCell(
-                            ft.Text(item["nombre"])
+                            ft.Text(
+                                str(item["telefono"]),
+                                size=11
+                            )
                         ),
-
-                        # ESTADO
-
                         ft.DataCell(
 
                             ft.Container(
@@ -454,8 +478,8 @@ class LegajosView(ft.Container):
                                 border_radius=20,
 
                                 padding=ft.Padding.symmetric(
-                                    horizontal=12,
-                                    vertical=5
+                                    horizontal=8,
+                                    vertical=2
                                 ),
 
                                 content=ft.Text(
@@ -470,16 +494,12 @@ class LegajosView(ft.Container):
                                         else "#991B1B"
                                     ),
 
-                                    size=12,
+                                    size=10,
 
                                     weight=ft.FontWeight.W_500
                                 )
                             )
                         ),
-
-                        # =================================
-                        # MENU CONTEXTUAL
-                        # =================================
 
                         ft.DataCell(
 
@@ -487,84 +507,36 @@ class LegajosView(ft.Container):
 
                                 icon=ft.Icons.MORE_VERT,
 
+                                icon_size=18,
+
                                 items=[
 
                                     ft.PopupMenuItem(
-
+                                        height=30,
                                         icon=ft.Icons.VISIBILITY_OUTLINED,
-
                                         content=ft.Text(
-                                            "Ver detalle"
+                                            "Ver detalle",
+                                            size=11
                                         )
                                     ),
 
                                     ft.PopupMenuItem(),
 
                                     ft.PopupMenuItem(
-
-                                        icon=ft.Icons.GROUPS_OUTLINED,
-
-                                        content=ft.Text(
-                                            "Familiares"
-                                        ),
-
-                                        on_click=lambda e, item=item:
-                                        self.open_familiares(item)
-                                    ),
-
-                                    ft.PopupMenuItem(
-
-                                        icon=ft.Icons.GAVEL_OUTLINED,
-
-                                        content=ft.Text(
-                                            "Sanciones"
-                                        ),
-
-                                        on_click=lambda e, item=item:
-                                        self.open_sanciones(item)
-                                    ),
-
-                                    ft.PopupMenuItem(
-
-                                        icon=ft.Icons.EVENT_NOTE_OUTLINED,
-
-                                        content=ft.Text(
-                                            "Licencias"
-                                        ),
-
-                                        on_click=lambda e, item=item:
-                                        self.open_licencias(item)
-                                    ),
-
-                                    ft.PopupMenuItem(
-
-                                        icon=ft.Icons.WORK_HISTORY_OUTLINED,
-
-                                        content=ft.Text(
-                                            "Historial laboral"
-                                        ),
-
-                                        on_click=lambda e, item=item:
-                                        self.open_historial(item)
-                                    ),
-
-                                    ft.PopupMenuItem(),
-
-                                    ft.PopupMenuItem(
-
+                                        height=30,
                                         icon=ft.Icons.EDIT_OUTLINED,
-
                                         content=ft.Text(
-                                            "Editar"
+                                            "Editar",
+                                            size=11
                                         )
                                     ),
 
                                     ft.PopupMenuItem(
-
+                                        height=30,
                                         icon=ft.Icons.DELETE_OUTLINE,
-
                                         content=ft.Text(
-                                            "Eliminar"
+                                            "Eliminar",
+                                            size=11
                                         )
                                     )
                                 ]
@@ -588,7 +560,7 @@ class LegajosView(ft.Container):
     # EVENTOS
     # =====================================
 
-    def buscar(self, e):
+    async def buscar(self, e):
 
         self.current_page = 1
 
@@ -596,7 +568,7 @@ class LegajosView(ft.Container):
 
         self.page_ref.update()
 
-    def next_page(self, e):
+    async def next_page(self, e):
 
         total_pages = max(
             1,
@@ -612,7 +584,7 @@ class LegajosView(ft.Container):
 
             self.page_ref.update()
 
-    def prev_page(self, e):
+    async def prev_page(self, e):
 
         if self.current_page > 1:
 
@@ -623,43 +595,108 @@ class LegajosView(ft.Container):
             self.page_ref.update()
 
     # =====================================
-    # MENU CONTEXTUAL
+    # API
     # =====================================
 
-    def open_familiares(self, item):
+    async def listar_legajos(self, e=None):
 
-        self.show_message(
-            f"Familiares del legajo {item['legajo']}"
-        )
+        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbWlcdTAwZjFvIiwidXNlcl9pZCI6MSwiZXhwIjoxNzc4NjEwOTg3fQ.-TJYHiRMhYcBB-CIx3HM5nj57u5NhjgmI42udc_eVWs"
 
-    def open_sanciones(self, item):
+        if not token:
 
-        self.show_message(
-            f"Sanciones del legajo {item['legajo']}"
-        )
+            await self.toast.show(
+                self.page_ref,
+                "Sesión expirada",
+                "error"
+            )
 
-    def open_licencias(self, item):
+            return
 
-        self.show_message(
-            f"Licencias del legajo {item['legajo']}"
-        )
+        headers = {
+            "Authorization": f"Bearer {token}"
+        }
 
-    def open_historial(self, item):
+        url = "http://192.168.101.56:8080/api/v1/legajos"
 
-        self.show_message(
-            f"Historial laboral del legajo {item['legajo']}"
-        )
+        try:
+
+            async with httpx.AsyncClient() as client:
+
+                response = await client.get(
+                    url,
+                    headers=headers,
+                    follow_redirects=True
+                )
+
+            if response.status_code == 401:
+
+                await self.toast.show(
+                    self.page_ref,
+                    "Token inválido o expirado",
+                    "error"
+                )
+
+                return
+
+            if response.status_code != 200:
+
+                await self.toast.show(
+                    self.page_ref,
+                    f"Error API: {response.status_code}",
+                    "error"
+                )
+
+                return
+
+            data = response.json()
+
+            self.legajos = [
+
+                {
+                    "cuil": x.get("cuil", 0),
+                    "apellido": x.get("apellido", ""),
+                    "nombre": x.get("nombre", ""),
+                    "telefono": x.get("telefono", ""),
+                    "activo": x.get("activo", True),
+                }
+
+                for x in data
+            ]
+
+            self.current_page = 1
+
+            self.load_data()
+
+            self.page_ref.update()
+
+        except Exception as ex:
+
+            print("ERROR:", ex)
+
+            await self.toast.show(
+                self.page_ref,
+                str(ex),
+                "error"
+            )
 
     # =====================================
-    # UTIL
+    # RELOAD VIEW
     # =====================================
 
-    def show_message(self, text):
+    async def reload_view(self):
 
-        self.page_ref.snack_bar = ft.SnackBar(
-            content=ft.Text(text)
-        )
+        self.txt_busqueda.value = ""
 
-        self.page_ref.snack_bar.open = True
+        self.chk_activos.value = True
+
+        self.current_page = 1
+
+        self.table.rows.clear()
+
+        self.lbl_total.value = "Total: 0"
+
+        self.lbl_page.value = ""
 
         self.page_ref.update()
+
+        await self.listar_legajos()

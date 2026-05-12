@@ -101,7 +101,19 @@ class Layout:
 
         if view_name in self.views:
 
-            self.content.content = self.views[view_name]
+            vista = self.views[view_name]
+
+            self.content.content = vista
+
+            # =====================================
+            # RECARGAR LEGJOS
+            # =====================================
+
+            if view_name == "legajos":
+
+                self.page.run_task(
+                    vista.listar_legajos
+                )
 
         else:
 
