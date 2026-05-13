@@ -603,7 +603,6 @@ class LegajosView(ft.Container):
         token = settings.TOKEN
 
         if not token:
-
             await self.toast.show(
                 self.page_ref,
                 "Sesión expirada",
@@ -637,7 +636,7 @@ class LegajosView(ft.Container):
                 )
 
                 return
-
+           
             if response.status_code != 200:
 
                 await self.toast.show(

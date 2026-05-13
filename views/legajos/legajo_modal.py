@@ -7,15 +7,7 @@ class ModalLegajo:
     def __init__(self, page):
 
         self.page = page
-
-        # =========================
-        # TOAST
-        # =========================
-        #self.toast = Toast()
-
-        # 👇 IMPORTANTE
-      
-       # self.page.overlay.append(self.toast) 
+       
         # =========================
         # LOADER
         # =========================
@@ -58,25 +50,18 @@ class ModalLegajo:
         )
 
         self.ddl_categoria = ft.Dropdown(
-            label="Categoría",
-            expand=True,
-            height=COMMON_HEIGHT,
-            options=[
-                ft.dropdown.Option("Administrativo"),
-                ft.dropdown.Option("Supervisor"),
-                ft.dropdown.Option("Guardia"),
-            ],
-        )
+                label="Categoría",
+                expand=True,
+                height=COMMON_HEIGHT,
+                options=[],
+)
 
         self.ddl_modalidad = ft.Dropdown(
-            label="Modalidad",
-            expand=True,
-            height=70,
-            options=[
-                ft.dropdown.Option("Mensual"),
-                ft.dropdown.Option("Jornal"),
-            ],
-        )
+                label="Modalidad",
+                expand=True,
+                height=COMMON_HEIGHT,
+                options=[],
+            )
 
         self.txt_telefono = ft.TextField(
             label="Teléfono",
@@ -205,6 +190,8 @@ class ModalLegajo:
     async def abrir_nuevo(self, e):
 
         self.limpiar()
+        await self.cargar_categoria()
+        await self.cargar_modalidad()
 
         self.dialog.open = True
 
@@ -385,3 +372,60 @@ class ModalLegajo:
             self.page.update() 
            
             return False
+    async def cargar_categoria(self):
+
+        token = settings.TOKEN
+
+        headers = {
+            "Authorization": f"Bearer {token}"
+        }
+
+        async with httpx.AsyncClient() as client:
+
+        # CATEGORIAS
+            response_categoria = await client.get(
+                f"{settings.URL_BACKEND}/categorias",
+                headers=headers
+            )
+
+        if response_categoria.status_code == 200:
+
+            categorias = response_categoria.json()
+           
+            self.ddl_categoria.options = [
+                ft.dropdown.Option(
+                    key=str(item["id"]),
+                    text=item["nombre"]
+                )
+                for item in categorias
+            ]           
+
+        self.page.update()
+    async def cargar_modalidad(self):
+
+        token = settings.TOKEN
+
+        headers = {
+            "Authorization": f"Bearer {token}"
+        }
+
+        async with httpx.AsyncClient() as client:
+        # MODALIDADES
+            response_modalidad = await client.get(
+                f"{settings.URL_BACKEND}/modalidades",
+                headers=headers
+            )
+
+            if response_modalidad.status_code == 200:
+
+                modalidades = response_modalidad.json()
+
+                self.ddl_modalidad.options = [
+                    ft.dropdown.Option(
+                        key=str(item["id"]),
+                        text=item["nombre"]
+                    )
+                    for item in modalidades
+                ]
+
+            self.page.update()
