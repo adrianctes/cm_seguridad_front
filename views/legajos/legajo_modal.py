@@ -1,6 +1,6 @@
 import flet as ft
 import httpx
-#from views.view_messages import Toast
+from  core.config import settings
 
 class ModalLegajo:
 
@@ -91,7 +91,7 @@ class ModalLegajo:
 
         self.lbl_mensaje = ft.Text( "",
             size=14,
-            weight=ft.FontWeight.BOLD,
+            color=ft.Colors.RED_400,
             visible=False,
         )
 
@@ -315,11 +315,7 @@ class ModalLegajo:
 
                 self.dialog.open = False
 
-                '''await self.toast.show(
-                    self.page,
-                    "Legajo guardado correctamente",
-                    "success"
-                )'''
+                
 
         finally:
 
@@ -347,9 +343,9 @@ class ModalLegajo:
     # =========================
     async def call_api(self, data):
 
-        token = "TU_TOKEN"
+        token = settings.TOKEN
 
-        url = "http://192.168.101.56:8080/api/v1/legajos"
+        url = f"{settings.URL_BACKEND}/legajos"
 
         try:
 
@@ -363,28 +359,28 @@ class ModalLegajo:
                     }
                 )
 
-            print(response)
-
             # SUCCESS
             if response.status_code in (200, 201):
-                self.lbl_mensaje.value = "Se guardo con exito."
-                self.lbl_mensaje.color = ft.Colors.GREEN_400
+                self.lbl_mensaje.value = "Se guardo con exito el legajo."
+                self.lbl_mensaje.color =  "#10F310"
                 self.lbl_mensaje.visible = True
                 self.page.update()
 
                 return True
 
             # ERROR API
-            self.lbl_mensaje.value = f"Error API: {response.json()['detail']}",
-            self.lbl_mensaje.color=ft.Colors.RED_400,
+           
+            self.lbl_mensaje.value = "Ocurrió un error al guardar el legajo."
+            self.lbl_mensaje.color= "#DC2626"
             self.lbl_mensaje.visible = True
             self.page.update()
           
             return False
 
         except Exception as ex:
-            self.lbl_mensaje.value =ex,
-            self.lbl_mensaje.color=ft.Colors.RED_400,
+            print(ex.args[0])
+            self.lbl_mensaje.value =ex
+            self.lbl_mensaje.color= "#DC2626"
             self.lbl_mensaje.visible = True
             self.page.update() 
            

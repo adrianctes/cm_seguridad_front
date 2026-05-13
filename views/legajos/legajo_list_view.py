@@ -3,7 +3,7 @@ import httpx
 
 from views.legajos.legajo_modal import ModalLegajo
 from views.view_messages import Toast
-
+from  core.config import settings
 
 class LegajosView(ft.Container):
 
@@ -600,7 +600,7 @@ class LegajosView(ft.Container):
 
     async def listar_legajos(self, e=None):
 
-        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbWlcdTAwZjFvIiwidXNlcl9pZCI6MSwiZXhwIjoxNzc4NjQ4NzI3fQ.VM0l709Qfku21c6Wnvgw4lKGa4HjQAGXOPxkbUbUO5A"
+        token = settings.TOKEN
 
         if not token:
 
@@ -616,7 +616,7 @@ class LegajosView(ft.Container):
             "Authorization": f"Bearer {token}"
         }
 
-        url = "http://192.168.101.56:8080/api/v1/legajos"
+        url = f"{settings.URL_BACKEND}/legajos"
 
         try:
 
