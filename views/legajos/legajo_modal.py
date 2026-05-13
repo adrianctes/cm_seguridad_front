@@ -5,83 +5,96 @@ import asyncio
 class ModalLegajo:
 
     def __init__(self, page):
-
         self.page = page
 
         # =========================
         # LOADER
         # =========================
-        self.loading = ft.ProgressRing(
-            visible=False,
-            width=18,
-            height=18
-        )
+        self.loading = ft.ProgressRing(visible=False)
+
+        COMMON_HEIGHT = 55
 
         # =========================
         # CAMPOS
         # =========================
-        self.txt_cuil = ft.TextField(label="CUIL", expand=True)
-        self.txt_apellido = ft.TextField(label="Apellido", expand=True)
-        self.txt_nombre = ft.TextField(label="Nombre", expand=True)
+        self.txt_cuil = ft.TextField(
+            label="CUIL",
+            width = 350,
+            height=70,
+            keyboard_type=ft.KeyboardType.NUMBER,
+            max_length=11,
+            on_change=self.solo_numeros,
+        )
+
+        self.txt_apellido = ft.TextField(
+            label="Apellido",
+            expand=True,
+            height=COMMON_HEIGHT,
+        )
+
+        self.txt_nombre = ft.TextField(
+            label="Nombre",
+            expand=True,
+            height=COMMON_HEIGHT,
+        )
 
         self.ddl_sexo = ft.Dropdown(
             label="Sexo",
             expand=True,
+            height=COMMON_HEIGHT,
             options=[
                 ft.dropdown.Option("M"),
                 ft.dropdown.Option("F"),
-            ]
+            ],
         )
 
         self.ddl_categoria = ft.Dropdown(
             label="Categoría",
             expand=True,
+            height=COMMON_HEIGHT,
             options=[
-                ft.dropdown.Option("A"),
-                ft.dropdown.Option("B"),
-                ft.dropdown.Option("C"),
-            ]
+                ft.dropdown.Option("Administrativo"),
+                ft.dropdown.Option("Supervisor"),
+                ft.dropdown.Option("Guardia"),
+            ],
         )
 
         self.ddl_modalidad = ft.Dropdown(
             label="Modalidad",
             expand=True,
+            height=70,
             options=[
-                ft.dropdown.Option("Planta"),
-                ft.dropdown.Option("Contratado"),
-                ft.dropdown.Option("Temporal"),
-            ]
+                ft.dropdown.Option("Mensual"),
+                ft.dropdown.Option("Jornal"),
+            ],
+        )
+
+        self.txt_telefono = ft.TextField(
+            label="Teléfono",
+            expand=True,
+            keyboard_type=ft.KeyboardType.NUMBER,
+            max_length=15,
+            on_change=self.solo_numeros,
         )
 
         self.chk_sac = ft.Checkbox(label="SAC", value=False)
         self.chk_activo = ft.Checkbox(label="Activo", value=True)
 
-        self.txt_cuil = ft.TextField(label="CUIL", expand=True,
-                                   keyboard_type=ft.KeyboardType.NUMBER,
-                                   max_length=13,
-                                   on_change=self.solo_numeros_cuil)
-
         # =========================
         # DIALOG
         # =========================
         self.dialog = ft.AlertDialog(
-
             modal=True,
             bgcolor="white",
             shape=ft.RoundedRectangleBorder(radius=0),
             content_padding=0,
             inset_padding=20,
-
             content=ft.Container(
-
                 width=750,
                 padding=20,
-
                 content=ft.Column(
-
                     tight=True,
-                    spacing=16,
-
+                    spacing=15,
                     controls=[
 
                         # HEADER
@@ -91,64 +104,40 @@ class ModalLegajo:
                                 ft.Column(
                                     spacing=2,
                                     controls=[
-                                        ft.Text(
-                                            "Nuevo Legajo",
-                                            size=18,
-                                            weight=ft.FontWeight.BOLD
-                                        ),
-                                        ft.Text(
-                                            "Complete los datos del empleado",
-                                            size=11,
-                                            color="#64748B"
-                                        )
-                                    ]
+                                        ft.Text("Nuevo Legajo", size=18, weight=ft.FontWeight.BOLD),
+                                        ft.Text("Complete los datos del empleado", size=11, color="#64748B"),
+                                    ],
                                 ),
-                                ft.IconButton(
-                                    icon=ft.Icons.CLOSE,
-                                    on_click=self.cerrar
-                                )
-                            ]
+                                ft.IconButton(icon=ft.Icons.CLOSE, on_click=self.cerrar),
+                            ],
                         ),
 
                         ft.Divider(),
 
                         # =========================
-                        # FORM (FIX AQUÍ)
+                        # FORM
                         # =========================
                         ft.Column(
-
                             spacing=12,
-
                             controls=[
-                                ft.Row([
-                                    ft.Column(
-                                        controls=[self.txt_cuil],
-                                       # expand=True,
-                                        width=350
-                                    ),
-                                  
-                                ]),
-                                
-                                ft.Row([
-                                    self.txt_apellido,
-                                    self.txt_nombre,
-                                ]),
-                                ft.Row([
-                                   
-                                    self.ddl_sexo,
-                                    self.ddl_categoria,
-                                ]),
 
-                                
+                                ft.Row([self.txt_cuil]),
 
-                                ft.Row([
-                                    self.ddl_modalidad,
-                                    self.chk_sac,
-                                    self.chk_activo,
-                                ]),
+                                ft.Row([self.txt_apellido, self.txt_nombre]),
 
-                               
-                            ]
+                                ft.Row([self.ddl_sexo, self.ddl_categoria]),
+
+                                # 🔥 PERFECTAMENTE ALINEADOS
+                                ft.Row(
+                                    spacing=10,
+                                    controls=[
+                                        self.ddl_modalidad,
+                                        self.txt_telefono,
+                                    ],
+                                ),
+
+                                ft.Row([self.chk_sac, self.chk_activo]),
+                            ],
                         ),
 
                         ft.Divider(),
@@ -156,24 +145,15 @@ class ModalLegajo:
                         # FOOTER
                         ft.Row(
                             alignment=ft.MainAxisAlignment.END,
-                            spacing=10,
                             controls=[
                                 self.loading,
-
-                                ft.OutlinedButton(
-                                    "Cancelar",
-                                    on_click=self.cerrar
-                                ),
-
-                                ft.FilledButton(
-                                    "Guardar",
-                                    on_click=self.guardar
-                                )
-                            ]
-                        )
-                    ]
-                )
-            )
+                                ft.OutlinedButton("Cancelar", on_click=self.cerrar),
+                                ft.FilledButton("Guardar", on_click=self.guardar),
+                            ],
+                        ),
+                    ],
+                ),
+            ),
         )
 
         self.page.overlay.append(self.dialog)
@@ -198,41 +178,44 @@ class ModalLegajo:
     # =========================
     def limpiar(self):
 
-    # =========================
-    # VALUES
-    # =========================
+        # =========================
+        # TEXTFIELDS
+        # =========================
+        self.txt_cuil.value = ""
         self.txt_apellido.value = ""
         self.txt_nombre.value = ""
-        self.txt_cuil.value = ""
+        self.txt_telefono.value = ""
 
+        # limpiar errores visuales
+        self.txt_cuil.error = None
+        self.txt_apellido.error = None
+        self.txt_nombre.error = None
+        self.txt_telefono.error = None
+
+        # =========================
+        # DROPDOWNS
+        # =========================
         self.ddl_sexo.value = None
         self.ddl_categoria.value = None
         self.ddl_modalidad.value = None
-
-        self.chk_sac.value = False
-        self.chk_activo.value = True
-
-        # =========================
-        # ERRORS (ESTO ES LO IMPORTANTE)
-        # =========================
-        self.txt_apellido.error = None
-        self.txt_nombre.error = None
-        self.txt_cuil.error = None
 
         self.ddl_sexo.error_text = None
         self.ddl_categoria.error_text = None
         self.ddl_modalidad.error_text = None
 
-        self.ddl_sexo.helper_text = None
-        self.ddl_categoria.helper_text = None
-        self.ddl_modalidad.helper_text = None
+        # =========================
+        # CHECKBOX
+        # =========================
+        self.chk_sac.value = False
+        self.chk_activo.value = True
 
         # =========================
         # UPDATE UI
         # =========================
+        self.txt_cuil.update()
         self.txt_apellido.update()
         self.txt_nombre.update()
-        self.txt_cuil.update()
+        self.txt_telefono.update()
 
         self.ddl_sexo.update()
         self.ddl_categoria.update()
@@ -240,7 +223,9 @@ class ModalLegajo:
 
         self.chk_sac.update()
         self.chk_activo.update()
-    # =========================
+
+        self.page.update()
+    
     # VALIDACIÓN
     # =========================
     async def validar_formulario(self):
@@ -287,7 +272,7 @@ class ModalLegajo:
             self.ddl_categoria.error_text = "Seleccione categoria"
             valido = False
         if not self.ddl_modalidad.value:
-            self.ddl_modalidad.error_text = "Seleccione categoria"
+            self.ddl_modalidad.error_text = "Seleccione modalidad"
             valido = False    
        
 
@@ -299,6 +284,7 @@ class ModalLegajo:
 
         return valido
 
+    # =========
     # =========================
     # GUARDAR
     # =========================
@@ -311,48 +297,25 @@ class ModalLegajo:
         self.page.update()
 
         try:
-
-            data = {
-                "apellido": self.txt_apellido.value,
-                "nombre": self.txt_nombre.value,
-                "sexo": self.ddl_sexo.value,
-                "categoria": self.ddl_categoria.value,
-                "modalidad": self.ddl_modalidad.value,
-                "sac": self.chk_sac.value,
-                "activo": self.chk_activo.value,
-                "cuil": self.txt_cuil.value,
-            }
-
             await asyncio.sleep(1)
-
-            self.page.snack_bar = ft.SnackBar(
-                content=ft.Text("Guardado correctamente"),
-                bgcolor="green"
-            )
-            self.page.snack_bar.open = True
 
             self.dialog.open = False
 
-        except Exception as ex:
-
             self.page.snack_bar = ft.SnackBar(
-                content=ft.Text(f"Error: {ex}"),
-                bgcolor="red"
+                content=ft.Text("Guardado correctamente"),
+                bgcolor="green",
             )
             self.page.snack_bar.open = True
 
         finally:
-
             self.loading.visible = False
             self.page.update()
-    
-    def solo_numeros_cuil(self, e):
 
-        valor = e.control.value
-
-        # deja solo dígitos
-        limpio = "".join(filter(str.isdigit, valor))
-
-        if valor != limpio:
+    # =========================
+    # SOLO NÚMEROS
+    # =========================
+    def solo_numeros(self, e):
+        limpio = "".join(filter(str.isdigit, e.control.value or ""))
+        if e.control.value != limpio:
             e.control.value = limpio
             e.control.update()
