@@ -600,7 +600,7 @@ class LegajosView(ft.Container):
 
     async def listar_legajos(self, e=None):
 
-        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbWlcdTAwZjFvIiwidXNlcl9pZCI6MSwiZXhwIjoxNzc4NjEwOTg3fQ.-TJYHiRMhYcBB-CIx3HM5nj57u5NhjgmI42udc_eVWs"
+        token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbWlcdTAwZjFvIiwidXNlcl9pZCI6MSwiZXhwIjoxNzc4NjQ4NzI3fQ.VM0l709Qfku21c6Wnvgw4lKGa4HjQAGXOPxkbUbUO5A"
 
         if not token:
 

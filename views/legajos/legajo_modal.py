@@ -1,12 +1,21 @@
 import flet as ft
-import asyncio
-
+import httpx
+#from views.view_messages import Toast
 
 class ModalLegajo:
 
     def __init__(self, page):
+
         self.page = page
 
+        # =========================
+        # TOAST
+        # =========================
+        #self.toast = Toast()
+
+        # 👇 IMPORTANTE
+      
+       # self.page.overlay.append(self.toast) 
         # =========================
         # LOADER
         # =========================
@@ -19,7 +28,7 @@ class ModalLegajo:
         # =========================
         self.txt_cuil = ft.TextField(
             label="CUIL",
-            width = 350,
+            width=350,
             height=70,
             keyboard_type=ft.KeyboardType.NUMBER,
             max_length=11,
@@ -80,6 +89,12 @@ class ModalLegajo:
         self.chk_sac = ft.Checkbox(label="SAC", value=False)
         self.chk_activo = ft.Checkbox(label="Activo", value=True)
 
+        self.lbl_mensaje = ft.Text( "",
+            size=14,
+            weight=ft.FontWeight.BOLD,
+            visible=False,
+        )
+
         # =========================
         # DIALOG
         # =========================
@@ -104,30 +119,45 @@ class ModalLegajo:
                                 ft.Column(
                                     spacing=2,
                                     controls=[
-                                        ft.Text("Nuevo Legajo", size=18, weight=ft.FontWeight.BOLD),
-                                        ft.Text("Complete los datos del empleado", size=11, color="#64748B"),
+                                        ft.Text(
+                                            "Nuevo Legajo",
+                                            size=18,
+                                            weight=ft.FontWeight.BOLD
+                                        ),
+                                        ft.Text(
+                                            "Complete los datos del empleado",
+                                            size=11,
+                                            color="#64748B",
+                                        ),
+                                        self.lbl_mensaje
                                     ],
                                 ),
-                                ft.IconButton(icon=ft.Icons.CLOSE, on_click=self.cerrar),
+                                ft.IconButton(
+                                    icon=ft.Icons.CLOSE,
+                                    on_click=self.cerrar
+                                ),
                             ],
                         ),
 
                         ft.Divider(),
 
-                        # =========================
                         # FORM
-                        # =========================
                         ft.Column(
                             spacing=12,
                             controls=[
 
                                 ft.Row([self.txt_cuil]),
 
-                                ft.Row([self.txt_apellido, self.txt_nombre]),
+                                ft.Row([
+                                    self.txt_apellido,
+                                    self.txt_nombre
+                                ]),
 
-                                ft.Row([self.ddl_sexo, self.ddl_categoria]),
+                                ft.Row([
+                                    self.ddl_sexo,
+                                    self.ddl_categoria
+                                ]),
 
-                                # 🔥 PERFECTAMENTE ALINEADOS
                                 ft.Row(
                                     spacing=10,
                                     controls=[
@@ -136,7 +166,10 @@ class ModalLegajo:
                                     ],
                                 ),
 
-                                ft.Row([self.chk_sac, self.chk_activo]),
+                                ft.Row([
+                                    self.chk_sac,
+                                    self.chk_activo
+                                ]),
                             ],
                         ),
 
@@ -147,8 +180,16 @@ class ModalLegajo:
                             alignment=ft.MainAxisAlignment.END,
                             controls=[
                                 self.loading,
-                                ft.OutlinedButton("Cancelar", on_click=self.cerrar),
-                                ft.FilledButton("Guardar", on_click=self.guardar),
+
+                                ft.OutlinedButton(
+                                    "Cancelar",
+                                    on_click=self.cerrar
+                                ),
+
+                                ft.FilledButton(
+                                    "Guardar",
+                                    on_click=self.guardar
+                                ),
                             ],
                         ),
                     ],
@@ -162,39 +203,38 @@ class ModalLegajo:
     # ABRIR
     # =========================
     async def abrir_nuevo(self, e):
+
         self.limpiar()
+
         self.dialog.open = True
+
         self.page.update()
 
     # =========================
     # CERRAR
     # =========================
     async def cerrar(self, e):
+
         self.dialog.open = False
+
         self.page.update()
 
     # =========================
     # LIMPIAR
     # =========================
     def limpiar(self):
-
-        # =========================
-        # TEXTFIELDS
-        # =========================
+        self.lbl_mensaje.visible= False
+        self.lbl_mensaje.value =  ""
         self.txt_cuil.value = ""
         self.txt_apellido.value = ""
         self.txt_nombre.value = ""
         self.txt_telefono.value = ""
 
-        # limpiar errores visuales
         self.txt_cuil.error = None
         self.txt_apellido.error = None
         self.txt_nombre.error = None
         self.txt_telefono.error = None
 
-        # =========================
-        # DROPDOWNS
-        # =========================
         self.ddl_sexo.value = None
         self.ddl_categoria.value = None
         self.ddl_modalidad.value = None
@@ -203,88 +243,46 @@ class ModalLegajo:
         self.ddl_categoria.error_text = None
         self.ddl_modalidad.error_text = None
 
-        # =========================
-        # CHECKBOX
-        # =========================
         self.chk_sac.value = False
         self.chk_activo.value = True
 
-        # =========================
-        # UPDATE UI
-        # =========================
-        self.txt_cuil.update()
-        self.txt_apellido.update()
-        self.txt_nombre.update()
-        self.txt_telefono.update()
-
-        self.ddl_sexo.update()
-        self.ddl_categoria.update()
-        self.ddl_modalidad.update()
-
-        self.chk_sac.update()
-        self.chk_activo.update()
-
         self.page.update()
-    
-    # VALIDACIÓN
+
+    # =========================
+    # VALIDAR
     # =========================
     async def validar_formulario(self):
 
         valido = True
-        primer_error = None
-         # reset errores
-      
-         # CUIL (simple validación)
+
         if not self.txt_cuil.value:
             self.txt_cuil.error = "El CUIL es obligatorio"
-            self.txt_cuil.update()
             valido = False
-            if not primer_error:
-                primer_error = self.txt_cuil
 
-        # APELLIDO
         if not self.txt_apellido.value:
             self.txt_apellido.error = "Apellido obligatorio"
-            self.txt_apellido.update()
             valido = False
-            if not primer_error:
-                primer_error = self.txt_apellido
-        else:
-            self.txt_apellido.error = None
-            self.txt_apellido.update()
 
-        # NOMBRE
         if not self.txt_nombre.value:
             self.txt_nombre.error = "Nombre obligatorio"
-            self.txt_nombre.update()
             valido = False
-            if not primer_error:
-                primer_error = self.txt_nombre
-        else:
-            self.txt_nombre.error = None
-            self.txt_nombre.update()
-         # SEXO
+
         if not self.ddl_sexo.value:
             self.ddl_sexo.error_text = "Seleccione sexo"
             valido = False
-         # SEXO
+
         if not self.ddl_categoria.value:
-            self.ddl_categoria.error_text = "Seleccione categoria"
+            self.ddl_categoria.error_text = "Seleccione categoría"
             valido = False
+
         if not self.ddl_modalidad.value:
             self.ddl_modalidad.error_text = "Seleccione modalidad"
-            valido = False    
-       
+            valido = False
 
         self.page.update()
 
-
-        if primer_error:
-            await primer_error.focus()
-
         return valido
 
-    # =========
     # =========================
     # GUARDAR
     # =========================
@@ -294,28 +292,100 @@ class ModalLegajo:
             return
 
         self.loading.visible = True
+
         self.page.update()
 
         try:
-            await asyncio.sleep(1)
 
-            self.dialog.open = False
+            data = {
+                "apellido": self.txt_apellido.value,
+                "nombre": self.txt_nombre.value,
+                "sexo": self.ddl_sexo.value,
+                "categoria": self.ddl_categoria.value,
+                "modalidad": self.ddl_modalidad.value,
+                "sac": self.chk_sac.value,
+                "activo": self.chk_activo.value,
+                "cuil": self.txt_cuil.value,
+                "telefono": self.txt_telefono.value,
+            }
 
-            self.page.snack_bar = ft.SnackBar(
-                content=ft.Text("Guardado correctamente"),
-                bgcolor="green",
-            )
-            self.page.snack_bar.open = True
+            ok = await self.call_api(data)
+
+            if ok:
+
+                self.dialog.open = False
+
+                '''await self.toast.show(
+                    self.page,
+                    "Legajo guardado correctamente",
+                    "success"
+                )'''
 
         finally:
+
             self.loading.visible = False
+
             self.page.update()
 
     # =========================
-    # SOLO NÚMEROS
+    # SOLO NUMEROS
     # =========================
     def solo_numeros(self, e):
-        limpio = "".join(filter(str.isdigit, e.control.value or ""))
+
+        limpio = "".join(
+            filter(str.isdigit, e.control.value or "")
+        )
+
         if e.control.value != limpio:
+
             e.control.value = limpio
+
             e.control.update()
+
+    # =========================
+    # API
+    # =========================
+    async def call_api(self, data):
+
+        token = "TU_TOKEN"
+
+        url = "http://192.168.101.56:8080/api/v1/legajos"
+
+        try:
+
+            async with httpx.AsyncClient() as client:
+
+                response = await client.post(
+                    url,
+                    json=data,
+                    headers={
+                        "Authorization": f"Bearer {token}"
+                    }
+                )
+
+            print(response)
+
+            # SUCCESS
+            if response.status_code in (200, 201):
+                self.lbl_mensaje.value = "Se guardo con exito."
+                self.lbl_mensaje.color = ft.Colors.GREEN_400
+                self.lbl_mensaje.visible = True
+                self.page.update()
+
+                return True
+
+            # ERROR API
+            self.lbl_mensaje.value = f"Error API: {response.json()['detail']}",
+            self.lbl_mensaje.color=ft.Colors.RED_400,
+            self.lbl_mensaje.visible = True
+            self.page.update()
+          
+            return False
+
+        except Exception as ex:
+            self.lbl_mensaje.value =ex,
+            self.lbl_mensaje.color=ft.Colors.RED_400,
+            self.lbl_mensaje.visible = True
+            self.page.update() 
+           
+            return False
