@@ -275,8 +275,8 @@ class ModalLegajo:
     # =========================
     async def guardar(self, e):
 
-        if not await self.validar_formulario():
-            return
+       # if not await self.validar_formulario():
+       #     return
 
         self.loading.visible = True
 
@@ -285,17 +285,17 @@ class ModalLegajo:
         try:
 
             data = {
+                "cuil": self.txt_cuil.value,
                 "apellido": self.txt_apellido.value,
                 "nombre": self.txt_nombre.value,
                 "sexo": self.ddl_sexo.value,
-                "categoria": self.ddl_categoria.value,
-                "modalidad": self.ddl_modalidad.value,
+                "categoria_id": self.ddl_categoria.value,
+                "modalidad_liquidacion_id": self.ddl_modalidad.value,
                 "sac": self.chk_sac.value,
                 "activo": self.chk_activo.value,
-                "cuil": self.txt_cuil.value,
-                "telefono": self.txt_telefono.value,
+                "telefono": self.txt_telefono.value
             }
-
+            
             ok = await self.call_api(data)
 
             if ok:
@@ -329,7 +329,7 @@ class ModalLegajo:
     # API
     # =========================
     async def call_api(self, data):
-
+    
         token = settings.TOKEN
 
         url = f"{settings.URL_BACKEND}/legajos"
@@ -356,9 +356,10 @@ class ModalLegajo:
                 return True
 
             # ERROR API
-           
-            self.lbl_mensaje.value = "Ocurrió un error al guardar el legajo."
-            self.lbl_mensaje.color= "#DC2626"
+            data = response.json()
+            msg = data.get("detail", "Error desconocido")
+            self.lbl_mensaje.value = msg#[0]["msg"]
+            self.lbl_mensaje.color = "#DC2626"
             self.lbl_mensaje.visible = True
             self.page.update()
           
@@ -366,7 +367,7 @@ class ModalLegajo:
 
         except Exception as ex:
             print(ex.args[0])
-            self.lbl_mensaje.value =ex
+            self.lbl_mensaje.value = ex
             self.lbl_mensaje.color= "#DC2626"
             self.lbl_mensaje.visible = True
             self.page.update() 
@@ -387,7 +388,7 @@ class ModalLegajo:
                 f"{settings.URL_BACKEND}/categorias",
                 headers=headers
             )
-
+      
         if response_categoria.status_code == 200:
 
             categorias = response_categoria.json()
