@@ -13,7 +13,7 @@ class LegajosView(ft.Container):
 
         self.page_ref = page
 
-        self.modal_legajo = ModalLegajo(page)
+        self.modal_legajo =  ModalLegajo(page, self.reload_view)
 
         self.toast = Toast()
 

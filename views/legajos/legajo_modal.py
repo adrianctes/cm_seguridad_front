@@ -1,11 +1,14 @@
+import asyncio
+
 import flet as ft
 import httpx
 from  core.config import settings
 
 class ModalLegajo:
 
-    def __init__(self, page):
-
+    def __init__(self, page, on_success=None):
+  
+        self.on_success = on_success
         self.page = page
        
         # =========================
@@ -31,12 +34,14 @@ class ModalLegajo:
             label="Apellido",
             expand=True,
             height=COMMON_HEIGHT,
+            on_change=self.force_upper
         )
 
         self.txt_nombre = ft.TextField(
             label="Nombre",
             expand=True,
             height=COMMON_HEIGHT,
+            on_change=self.force_upper
         )
 
         self.ddl_sexo = ft.Dropdown(
@@ -295,12 +300,14 @@ class ModalLegajo:
                 "activo": self.chk_activo.value,
                 "telefono": self.txt_telefono.value
             }
-            
             ok = await self.call_api(data)
 
             if ok:
-
                 self.dialog.open = False
+                self.page.update()
+               
+                if self.on_success:
+                    await   self.on_success()
 
                 
 
@@ -349,10 +356,10 @@ class ModalLegajo:
             # SUCCESS
             if response.status_code in (200, 201):
                 self.lbl_mensaje.value = "Se guardo con exito el legajo."
-                self.lbl_mensaje.color =  "#10F310"
+                self.lbl_mensaje.color =  "#069206"
                 self.lbl_mensaje.visible = True
                 self.page.update()
-
+                await asyncio.sleep(3)    
                 return True
 
             # ERROR API
@@ -430,3 +437,7 @@ class ModalLegajo:
                 ]
 
             self.page.update()
+
+    def force_upper(self, e):
+        e.control.value = (e.control.value or "").upper()
+        e.control.update()        
