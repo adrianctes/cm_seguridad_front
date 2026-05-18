@@ -5,7 +5,7 @@ from services.legajo_service import LegajoService
 from components.sidebar import Sidebar
 
 from views.legajos.legajo_list_view import LegajosView
-
+from views.legajos.legajo_crear_view import CrearLegajoView
 
 class Layout:
 
@@ -56,7 +56,8 @@ class Layout:
                 )
             ),
 
-            "legajos": LegajosView(page)
+            "legajos": LegajosView(page),
+            "crear_legajo": CrearLegajoView(page)
 
         }
 
@@ -113,7 +114,12 @@ class Layout:
 
                 self.page.run_task(
                     vista.listar_legajos
-                )
+                ),
+            elif view_name == "crear_legajo":
+                    self.page.run_task(
+                        vista.load
+                    )
+                                
 
         else:
 

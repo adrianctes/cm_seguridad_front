@@ -204,7 +204,8 @@ class LegajosView(ft.Container):
 
                             height=36,
 
-                            on_click=self.modal_legajo.abrir_nuevo,
+                            #on_click=self.modal_legajo.abrir_nuevo,
+                            on_click=lambda e: self.page_ref.layout.change_view("crear_legajo"),
 
                             style=ft.ButtonStyle(
                                 shape=ft.RoundedRectangleBorder(
@@ -520,16 +521,21 @@ class LegajosView(ft.Container):
                                         )
                                     ),
 
-                                    ft.PopupMenuItem(),
-
                                     ft.PopupMenuItem(
-                                        height=30,
-                                        icon=ft.Icons.EDIT_OUTLINED,
-                                        content=ft.Text(
-                                            "Editar",
-                                            size=11
-                                        )
-                                    ),
+                                            height=30,
+                                            icon=ft.Icons.EDIT_OUTLINED,
+                                            content=ft.Text(
+                                                "Editar",
+                                                size=11
+                                            ),
+                                            on_click=lambda e, item=item:
+                                                self.page_ref.run_task(
+                                                    self.modal_legajo.editar,
+                                                    e,
+                                                    item
+                                                )
+                                        ),                             
+                                    
 
                                     ft.PopupMenuItem(
                                         height=30,
@@ -538,7 +544,41 @@ class LegajosView(ft.Container):
                                             "Eliminar",
                                             size=11
                                         )
-                                    )
+                                    ),
+                                    ft.PopupMenuItem(),  # divisor
+                                    ft.PopupMenuItem(
+                                        height=30,
+                                        icon=ft.Icons.GROUPS_OUTLINED,
+                                        content=ft.Text(
+                                            "Familiares",
+                                            size=11
+                                        )
+                                    ),
+                                    ft.PopupMenuItem(
+                                        height=30,
+                                        icon=ft.Icons.EVENT_NOTE_OUTLINED,
+                                        content=ft.Text(
+                                            "Licencias",
+                                            size=11
+                                        )
+                                    ),
+                                    ft.PopupMenuItem(
+                                        height=30,
+                                        icon=ft.Icons.GAVEL_OUTLINED,
+                                        content=ft.Text(
+                                            "Sanciones",
+                                            size=11
+                                        )
+                                    ),
+                                    ft.PopupMenuItem(
+                                        height=30,
+                                        icon=ft.Icons.WORK_HISTORY_OUTLINED,
+                                        content=ft.Text(
+                                            "Historia laboral",
+                                            size=11
+                                        )
+                                    ) 
+
                                 ]
                             )
                         )
@@ -652,11 +692,16 @@ class LegajosView(ft.Container):
             self.legajos = [
 
                 {
+                    "id" : x.get('id'),
                     "cuil": x.get("cuil", 0),
                     "apellido": x.get("apellido", ""),
                     "nombre": x.get("nombre", ""),
+                    "sexo": x.get("sexo",""),
+                    "categoria_id": x.get("categoria_id"),
+                    "modalidad_liquidacion_id":  x.get("modalidad_liquidacion_id"),
                     "telefono": x.get("telefono", ""),
                     "activo": x.get("activo", True),
+                    "sac":  x.get("sac", False),
                 }
 
                 for x in data

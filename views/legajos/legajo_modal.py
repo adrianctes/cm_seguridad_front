@@ -10,7 +10,7 @@ class ModalLegajo:
   
         self.on_success = on_success
         self.page = page
-       
+        self.legajo_id = None
         # =========================
         # LOADER
         # =========================
@@ -193,7 +193,7 @@ class ModalLegajo:
     # ABRIR
     # =========================
     async def abrir_nuevo(self, e):
-
+        self.legajo_id=0
         self.limpiar()
         await self.cargar_categoria()
         await self.cargar_modalidad()
@@ -202,6 +202,40 @@ class ModalLegajo:
 
         self.page.update()
 
+    # =========================
+    # EDIATR
+    # =========================
+    async def editar(self, e, item):
+        
+        self.limpiar()
+
+        self.modo_edicion = True
+        self.legajo_id = item["id"]
+
+        await self.cargar_categoria()
+        await self.cargar_modalidad()
+
+        # =========================
+        # CARGAR DATOS
+        # =========================
+        self.txt_cuil.value = item["cuil"]
+        self.txt_apellido.value = item["apellido"]
+        self.txt_nombre.value = item["nombre"]
+        self.ddl_sexo.value = item["sexo"]
+
+        self.ddl_categoria.value = str(item["categoria_id"])
+        self.ddl_modalidad.value = str(item["modalidad_liquidacion_id"])
+
+        self.txt_telefono.value = item["telefono"]
+
+        self.chk_sac.value = item["sac"]
+        self.chk_activo.value = item["activo"]
+
+        self.dialog.open = True
+
+        self.page.update()
+
+     
     # =========================
     # CERRAR
     # =========================
@@ -280,8 +314,8 @@ class ModalLegajo:
     # =========================
     async def guardar(self, e):
 
-       # if not await self.validar_formulario():
-       #     return
+        if not await self.validar_formulario():
+            return
 
         self.loading.visible = True
 
@@ -300,7 +334,11 @@ class ModalLegajo:
                 "activo": self.chk_activo.value,
                 "telefono": self.txt_telefono.value
             }
-            ok = await self.call_api(data)
+            if self.legajo_id == 0:
+                ok = await self.api_crear(data)
+            else:
+                ok = await self.api_editar(data)
+          
 
             if ok:
                 self.dialog.open = False
@@ -335,7 +373,7 @@ class ModalLegajo:
     # =========================
     # API
     # =========================
-    async def call_api(self, data):
+    async def api_crear(self, data):
     
         token = settings.TOKEN
 
@@ -380,6 +418,24 @@ class ModalLegajo:
             self.page.update() 
            
             return False
+    async def api_editar(self, data):
+
+        token = settings.TOKEN
+
+        url = f"{settings.URL_BACKEND}/legajos/{self.legajo_id}"
+
+        async with httpx.AsyncClient() as client:
+
+            response = await client.put(
+                url,
+                json=data,
+                headers={
+                    "Authorization": f"Bearer {token}"
+                }
+            )
+
+        return response.status_code in (200, 201)
+    
     async def cargar_categoria(self):
 
         token = settings.TOKEN
@@ -437,7 +493,6 @@ class ModalLegajo:
                 ]
 
             self.page.update()
-
     def force_upper(self, e):
         e.control.value = (e.control.value or "").upper()
         e.control.update()        
