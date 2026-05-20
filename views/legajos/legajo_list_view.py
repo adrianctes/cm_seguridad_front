@@ -492,7 +492,12 @@ class LegajosView(ft.Container):
                                             "Ver detalle",
                                             size=11
                                         ),
-                                        on_click=lambda e, item=item: self.abrir_detalle(item)
+                                        on_click=lambda e, item=item:
+                                            self.page_ref.run_task(
+                                                self.abrir_detalle,
+                                                item
+                                            )
+                                                                                #on_click=lambda e, item=item: self.abrir_detalle(item)
                                         #on_click=lambda e: self.page_ref.layout.change_view("gestion_legajo"),
                                     ),
 
@@ -708,8 +713,12 @@ class LegajosView(ft.Container):
 
         await self.listar_legajos()
     
-    def abrir_detalle(self, item):
+    async def abrir_detalle(self, item):
 
-        self.page_ref.layout.change_view("gestion_legajo")
-
-     
+        gestion = self.page_ref.layout.views[ "gestion_legajo"]
+        gestion.selected_item = item
+        await  gestion.load()
+    
+        self.page_ref.layout.change_view(
+            "gestion_legajo"
+            )

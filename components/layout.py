@@ -94,22 +94,42 @@ class Layout:
             # =========================
             # HOOKS OPCIONALES
             # =========================
-            if view_name == "dashboard":
-                if hasattr(vista, "listar_legajos"):
-                    #vista.listar_legajos()
-                    self.page.run_task(vista.listar_legajos)
-            elif view_name == "legajos":
-                if hasattr(vista, "listar_legajos"):
-                    #vista.listar_legajos()
-                    self.page.run_task(vista.listar_legajos)
 
-            elif view_name in ["crear_legajo", "gestion_legajo"]:
+            if view_name == "dashboard":
+
+                if hasattr(vista, "listar_legajos"):
+
+                    self.page.run_task(
+                        vista.listar_legajos
+                    )
+
+            elif view_name == "legajos":
+
+                if hasattr(vista, "listar_legajos"):
+
+                    self.page.run_task(
+                        vista.listar_legajos
+                    )
+
+            elif view_name in [
+                "crear_legajo",
+                "gestion_legajo"
+            ]:
+
                 if hasattr(vista, "load"):
-                    vista.load()
+
+                    self.page.run_task(
+                        vista.load
+                    )
 
         else:
+
             self.content.content = ft.Container(
-                content=ft.Text(f"Vista '{view_name}' en construcción", size=26)
+
+                content=ft.Text(
+                    f"Vista '{view_name}' en construcción",
+                    size=26
+                )
             )
 
         self.page.update()

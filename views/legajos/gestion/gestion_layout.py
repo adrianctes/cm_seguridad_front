@@ -1,7 +1,7 @@
 import flet as ft
 
 from views.legajos.gestion.legajo_sidebar_view import Sidebar
-from views.legajos.gestion.editar_view import EditarView
+from views.legajos.gestion.editar_view import EditarLegajoView
 from views.legajos.gestion.licencias_view import LicenciasView
 from views.legajos.gestion.historial_view import HistoriaView
 from views.legajos.gestion.familiares_view import FamiliaresView
@@ -14,45 +14,35 @@ class GestionLegajoLayout(ft.Container):
         super().__init__()
 
         self.page_ref = page
-        self.padding = -10          
+        self.selected_item = None
+        self.current_key = "editar"
+        self.selected_item = None
+
         # =========================
         # VIEWS
         # =========================
         self.views = {
-            "editar": EditarView(page),
+            "editar": EditarLegajoView(page),
             "licencias": LicenciasView(page),
             "historia": HistoriaView(page),
             "familiares": FamiliaresView(page),
             "sanciones": SancionesView(page),
         }
 
-        self.current_key = "editar"
-
         # =========================
         # SIDEBAR
         # =========================
         self.sidebar = Sidebar(page, self.change_view)
-
-        # IMPORTANTE: usar build()
         self.sidebar_view = self.sidebar.build()
 
-        self.sidebar.set_default_item()
-
         # =========================
-        # MAIN VIEW
+        # MAIN
         # =========================
-        self.current_key = "editar"
-
         self.main_container = ft.Container(
             expand=True,
             content=self.views["editar"]
         )
 
-        self.sidebar.set_default_item()
-
-        # =========================
-        # LAYOUT FINAL
-        # =========================
         self.content = self.build_layout()
 
     def build_layout(self):
@@ -74,17 +64,15 @@ class GestionLegajoLayout(ft.Container):
 
         self.page_ref.update()
 
-    def load(self):
+    async def load(self):
 
-        # reset sidebar
         self.sidebar.set_default_item()
 
-        # reset view
         self.current_key = "editar"
 
         self.main_container.content = self.views["editar"]
 
-        # refresh
         self.page_ref.update()
 
-        return self
+        # recién ahora cargar
+        await self.views["editar"].load(self.selected_item)
