@@ -46,37 +46,6 @@ class CrearLegajoView(ft.Container):
             label="Fecha Alta"
         )
        
-# =====================================
-# FECHA ALTA
-# =====================================
-
-        ''' self.txt_fecha_alta = ft.TextField(
-
-            label="Fecha de Alta",
-
-            expand=True,
-
-            height=55,
-
-            read_only=True,
-
-            filled=True,
-
-            bgcolor="white",
-
-            border_color="#CBD5E1",
-
-            focused_border_color="#0F172A",
-
-            text_size=13,
-
-            content_padding=12,
-
-            suffix_icon=ft.Icons.CALENDAR_MONTH,
-
-            on_click=lambda e:
-                self.fecha_alta.abrir_fecha()
-        )'''
         self.txt_cuil = ft.TextField(
             label="CUIL",
             expand=True,
@@ -351,12 +320,14 @@ class CrearLegajoView(ft.Container):
 
     def limpiar(self):
 
+        self.fecha_alta.reset()
+    
         self.lbl_mensaje.visible = False
 
         self.lbl_mensaje.value = ""
 
         self.txt_cuil.value = ""
-
+        
         self.txt_apellido.value = ""
 
         self.txt_nombre.value = ""

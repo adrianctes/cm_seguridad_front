@@ -1,7 +1,6 @@
 import flet as ft
 import httpx
 
-from views.legajos.legajo_modal import ModalLegajo
 from views.view_messages import Toast
 from  core.config import settings
 
@@ -12,14 +11,8 @@ class LegajosView(ft.Container):
         super().__init__()
 
         self.page_ref = page
-
-        self.modal_legajo =  ModalLegajo(page, self.reload_view)
-
+      
         self.toast = Toast()
-
-        # =====================================
-        # ESTADO
-        # =====================================
 
         self.current_page = 1
 
@@ -27,25 +20,15 @@ class LegajosView(ft.Container):
 
         self.total_items = 0
 
-        # =====================================
-        # DATA
-        # =====================================
 
         self.legajos = []
-
-        # =====================================
-        # CONFIG GENERAL
-        # =====================================
 
         self.expand = True
 
         self.bgcolor = "#F1F5F9"
 
-        self.padding = 6
+        self.padding = 20
 
-        # =====================================
-        # FILTROS
-        # =====================================
 
         self.txt_busqueda = ft.TextField(
 
@@ -162,7 +145,7 @@ class LegajosView(ft.Container):
             expand=True,
 
             spacing=10,
-
+          
             controls=[
 
                 # =================================
@@ -356,9 +339,6 @@ class LegajosView(ft.Container):
             ]
         )
 
-        # =====================================
-        # STACK
-        # =====================================
 
         self.content = ft.Stack(
 
@@ -372,15 +352,8 @@ class LegajosView(ft.Container):
             ]
         )
 
-        # =====================================
-        # CARGAR DATOS
-        # =====================================
-
         page.run_task(self.listar_legajos)
 
-    # =====================================
-    # LOAD DATA
-    # =====================================
 
     def load_data(self):
 
@@ -518,7 +491,9 @@ class LegajosView(ft.Container):
                                         content=ft.Text(
                                             "Ver detalle",
                                             size=11
-                                        )
+                                        ),
+                                        on_click=lambda e, item=item: self.abrir_detalle(item)
+                                        #on_click=lambda e: self.page_ref.layout.change_view("gestion_legajo"),
                                     ),
 
                                     ft.PopupMenuItem(
@@ -596,10 +571,6 @@ class LegajosView(ft.Container):
             f"Página {self.current_page} de {total_pages}"
         )
 
-    # =====================================
-    # EVENTOS
-    # =====================================
-
     async def buscar(self, e):
 
         self.current_page = 1
@@ -633,10 +604,6 @@ class LegajosView(ft.Container):
             self.load_data()
 
             self.page_ref.update()
-
-    # =====================================
-    # API
-    # =====================================
 
     async def listar_legajos(self, e=None):
 
@@ -723,10 +690,6 @@ class LegajosView(ft.Container):
                 "error"
             )
 
-    # =====================================
-    # RELOAD VIEW
-    # =====================================
-
     async def reload_view(self):
 
         self.txt_busqueda.value = ""
@@ -744,3 +707,9 @@ class LegajosView(ft.Container):
         self.page_ref.update()
 
         await self.listar_legajos()
+    
+    def abrir_detalle(self, item):
+
+        self.page_ref.layout.change_view("gestion_legajo")
+
+     

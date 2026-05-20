@@ -37,7 +37,6 @@ class DatePickerCustom(ft.Container):
     # OPEN CALENDAR
     # =========================
     def open_calendar(self, e):
-
         if not self.dialog:
             self.dialog = ft.AlertDialog(
                 shape=ft.RoundedRectangleBorder(radius=0),  # 🔥 sin radius
@@ -176,3 +175,14 @@ class DatePickerCustom(ft.Container):
         if self.dialog:
             self.dialog.open = False
             self.page.update()
+
+
+    def reset(self):
+        self.input.value = ""
+        self.selected_date = None
+        self.current_date = datetime.date.today()
+
+        if hasattr(self, "date_picker"):
+            self.date_picker.value = None
+
+        self.page_ref.update()

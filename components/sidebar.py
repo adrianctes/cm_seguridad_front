@@ -4,7 +4,7 @@ import flet as ft
 class Sidebar:
 
     def __init__(self, page, change_page):
-
+        
         self.page = page
         self.change_page = change_page
 

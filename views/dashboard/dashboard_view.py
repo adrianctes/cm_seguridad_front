@@ -1,78 +1,20 @@
 import flet as ft
 
 
-class DashboardView:
+class DashboardView(ft.Container):
 
-    def build(self):
+    def __init__(self, page):
+        super().__init__()
 
-        return ft.Container(
-            expand=True,
-            padding=20,
-            content=ft.Column(
-                controls=[
+        self.expand = True
 
-                    ft.Text(
-                        "Dashboard",
-                        size=30,
-                        weight=ft.FontWeight.BOLD
-                    ),
+        # 👇 ESTE es el control de espacio de la vista
+        self.padding = 20
 
-                    ft.ResponsiveRow(
-                        controls=[
-
-                            self.card(
-                                "Legajos",
-                                "200"
-                            ),
-
-                            self.card(
-                                "Turnos",
-                                "35"
-                            ),
-
-                            self.card(
-                                "Liquidaciones",
-                                "198"
-                            ),
-
-                            self.card(
-                                "Novedades",
-                                "12"
-                            )
-
-                        ]
-                    )
-
-                ]
-            )
-        )
-
-    def card(self, title, value):
-
-        return ft.Container(
-            col={"sm": 6, "md": 3},
-            bgcolor="white",
-            border_radius=15,
-            padding=20,
-            shadow=ft.BoxShadow(
-                blur_radius=15,
-                color="#00000010"
-            ),
-            content=ft.Column(
-                controls=[
-
-                    ft.Text(
-                        title,
-                        size=15,
-                        color="grey"
-                    ),
-
-                    ft.Text(
-                        value,
-                        size=30,
-                        weight=ft.FontWeight.BOLD
-                    )
-
-                ]
-            )
+        self.content = ft.Column(
+            spacing=10,
+            controls=[
+                ft.Text("Dashboard"),
+                ft.Text("Contenido"),
+            ]
         )
