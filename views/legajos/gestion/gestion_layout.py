@@ -3,9 +3,10 @@ import flet as ft
 from views.legajos.gestion.legajo_sidebar_view import Sidebar
 from views.legajos.gestion.editar_view import EditarLegajoView
 from views.legajos.gestion.licencias_view import LicenciasView
-from views.legajos.gestion.historial_view import HistoriaView
+from views.legajos.gestion.historia_laboral_view import HistoriaView
 from views.legajos.gestion.familiares_view import FamiliaresView
 from views.legajos.gestion.sanciones_view import SancionesView
+from views.legajos.gestion.notas_view import NotasView
 
 
 class GestionLegajoLayout(ft.Container):
@@ -14,30 +15,46 @@ class GestionLegajoLayout(ft.Container):
         super().__init__()
 
         self.page_ref = page
-        self.selected_item = None
+
         self.current_key = "editar"
-        self.selected_item = None
+
+        self.legajo_id = None
 
         # =========================
         # VIEWS
         # =========================
+
         self.views = {
+
             "editar": EditarLegajoView(page),
+
             "licencias": LicenciasView(page),
+
             "historia": HistoriaView(page),
+
             "familiares": FamiliaresView(page),
+
             "sanciones": SancionesView(page),
+
+            "notas": NotasView(page)
+
         }
 
         # =========================
         # SIDEBAR
         # =========================
-        self.sidebar = Sidebar(page, self.change_view)
+
+        self.sidebar = Sidebar(
+            page,
+            self.change_view
+        )
+
         self.sidebar_view = self.sidebar.build()
 
         # =========================
         # MAIN
         # =========================
+
         self.main_container = ft.Container(
             expand=True,
             content=self.views["editar"]
@@ -46,11 +63,17 @@ class GestionLegajoLayout(ft.Container):
         self.content = self.build_layout()
 
     def build_layout(self):
+
         return ft.Row(
+
             expand=True,
+
             controls=[
+
                 self.sidebar_view,
+
                 self.main_container
+
             ]
         )
 
@@ -60,19 +83,27 @@ class GestionLegajoLayout(ft.Container):
             return
 
         self.current_key = route
-        self.main_container.content = self.views[route]
+
+        vista = self.views[route]
+
+        self.main_container.content = vista
 
         self.page_ref.update()
+
+        # =========================
+        # LOAD OPCIONAL
+        # =========================
+
+        if hasattr(vista, "load"):
+
+            self.page_ref.run_task(
+                vista.load,
+                self.legajo_id
+            )
 
     async def load(self):
 
         self.sidebar.set_default_item()
 
-        self.current_key = "editar"
-
-        self.main_container.content = self.views["editar"]
-
-        self.page_ref.update()
-
-        # recién ahora cargar
-        await self.views["editar"].load(self.selected_item)
+        # abrir editar por defecto
+        self.change_view("editar")

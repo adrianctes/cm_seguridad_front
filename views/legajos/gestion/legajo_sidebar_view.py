@@ -190,6 +190,8 @@ class Sidebar:
                     self.item("Sanciones", "sanciones"),
 
                     self.item("Historia laboral", "historia"),
+                    
+                    self.item("Notas", "notas"),
                 ]
             )
         )

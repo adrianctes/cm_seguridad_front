@@ -8,88 +8,22 @@ class SancionesView(ft.Container):
 
         self.page_ref = page
 
-        # =========================
-        # CAMPOS
-        # =========================
-        self.tipo = ft.Dropdown(
-            label="Tipo de sanción",
-            width=300,
-            options=[
-                ft.dropdown.Option("Apercibimiento"),
-                ft.dropdown.Option("Suspensión"),
-                ft.dropdown.Option("Sumario"),
-                ft.dropdown.Option("Llamado de atención"),
-            ]
-        )
+        self.expand = True
 
-        self.fecha = ft.TextField(label="Fecha (YYYY-MM-DD)", width=250)
+        self.padding = 20
 
-        self.motivo = ft.TextField(
-            label="Motivo",
-            width=600,
-            multiline=True,
-            min_lines=2,
-            max_lines=4
-        )
+        self.lbl = ft.Text("Cargando...")
 
-        # =========================
-        # BOTÓN
-        # =========================
-        self.btn_agregar = ft.ElevatedButton(
-            content=ft.Text("Registrar sanción"),
-            icon=ft.Icons.WARNING,
-            on_click=self.agregar_sancion
-        )
-
-        # =========================
-        # LISTA
-        # =========================
-        self.lista = ft.ListView(expand=True, spacing=10)
-
-        self.sanciones = []
-
-        self.content = self.build()
-
-    def build(self):
-        return ft.Column(
-            expand=True,
-            spacing=20,
+        self.content = ft.Column(
+            spacing=10,
             controls=[
-                ft.Text("Sanciones", size=22, weight=ft.FontWeight.BOLD),
-
-                self.tipo,
-                ft.Row([self.fecha]),
-                self.motivo,
-
-                ft.Row([self.btn_agregar], alignment=ft.MainAxisAlignment.END),
-
-                ft.Divider(),
-
-                self.lista
+                ft.Text("Sanciones"),
+                self.lbl,
             ]
         )
 
-    def agregar_sancion(self, e):
+    async def load(self, legajo_id=None):
 
-        sancion = {
-            "tipo": self.tipo.value,
-            "fecha": self.fecha.value,
-            "motivo": self.motivo.value
-        }
+        self.lbl.value = "Pagina en Contruccion"
 
-        self.sanciones.append(sancion)
-
-        self.lista.controls.append(
-            ft.Card(
-                content=ft.Container(
-                    padding=10,
-                    content=ft.Column([
-                        ft.Text(f"Tipo: {sancion['tipo']}"),
-                        ft.Text(f"Fecha: {sancion['fecha']}"),
-                        ft.Text(sancion['motivo'])
-                    ])
-                )
-            )
-        )
-
-        self.page.update()
+        self.page_ref.update()

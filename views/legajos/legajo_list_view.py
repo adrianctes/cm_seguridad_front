@@ -339,7 +339,6 @@ class LegajosView(ft.Container):
             ]
         )
 
-
         self.content = ft.Stack(
 
             expand=True,
@@ -353,7 +352,6 @@ class LegajosView(ft.Container):
         )
 
         page.run_task(self.listar_legajos)
-
 
     def load_data(self):
 
@@ -497,26 +495,8 @@ class LegajosView(ft.Container):
                                                 self.abrir_detalle,
                                                 item
                                             )
-                                                                                #on_click=lambda e, item=item: self.abrir_detalle(item)
-                                        #on_click=lambda e: self.page_ref.layout.change_view("gestion_legajo"),
                                     ),
-
-                                    ft.PopupMenuItem(
-                                            height=30,
-                                            icon=ft.Icons.EDIT_OUTLINED,
-                                            content=ft.Text(
-                                                "Editar",
-                                                size=11
-                                            ),
-                                            on_click=lambda e, item=item:
-                                                self.page_ref.run_task(
-                                                    self.modal_legajo.editar,
-                                                    e,
-                                                    item
-                                                )
-                                        ),                             
-                                    
-
+                                    ft.PopupMenuItem(),  # divisor
                                     ft.PopupMenuItem(
                                         height=30,
                                         icon=ft.Icons.DELETE_OUTLINE,
@@ -525,40 +505,8 @@ class LegajosView(ft.Container):
                                             size=11
                                         )
                                     ),
-                                    ft.PopupMenuItem(),  # divisor
-                                    ft.PopupMenuItem(
-                                        height=30,
-                                        icon=ft.Icons.GROUPS_OUTLINED,
-                                        content=ft.Text(
-                                            "Familiares",
-                                            size=11
-                                        )
-                                    ),
-                                    ft.PopupMenuItem(
-                                        height=30,
-                                        icon=ft.Icons.EVENT_NOTE_OUTLINED,
-                                        content=ft.Text(
-                                            "Licencias",
-                                            size=11
-                                        )
-                                    ),
-                                    ft.PopupMenuItem(
-                                        height=30,
-                                        icon=ft.Icons.GAVEL_OUTLINED,
-                                        content=ft.Text(
-                                            "Sanciones",
-                                            size=11
-                                        )
-                                    ),
-                                    ft.PopupMenuItem(
-                                        height=30,
-                                        icon=ft.Icons.WORK_HISTORY_OUTLINED,
-                                        content=ft.Text(
-                                            "Historia laboral",
-                                            size=11
-                                        )
-                                    ) 
-
+                                                                                                   
+                                    
                                 ]
                             )
                         )
@@ -713,12 +661,25 @@ class LegajosView(ft.Container):
 
         await self.listar_legajos()
     
-    async def abrir_detalle(self, item):
+    '''async def abrir_detalle(self, item):
 
         gestion = self.page_ref.layout.views[ "gestion_legajo"]
-        gestion.selected_item = item
+        gestion.legajo_id = item['id']
         await  gestion.load()
     
         self.page_ref.layout.change_view(
             "gestion_legajo"
-            )
+            )''' 
+    async def abrir_detalle(self, item):
+
+        gestion = self.page_ref.layout.views[
+            "gestion_legajo"
+        ]
+
+        gestion.legajo_id = item["id"]
+
+        self.page_ref.layout.change_view(
+            "gestion_legajo"
+        )
+
+        await gestion.load()

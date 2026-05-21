@@ -5,6 +5,7 @@ import flet as ft
 import httpx
 
 from components.datapicker import DatePickerCustom
+from views.view_messages import Toast
 from core.config import settings
 
 
@@ -25,6 +26,7 @@ class EditarLegajoView(ft.Container):
         self.padding = 20
        
         self.selected_item = None
+        self.toast = Toast()
         # =====================================
         # LOADER
         # =====================================
@@ -105,7 +107,7 @@ class EditarLegajoView(ft.Container):
 
         self.txt_cbu = ft.TextField(
             label="CBU",
-            height=60,
+            height=62,
             expand=True,
             keyboard_type=ft.KeyboardType.NUMBER,
             max_length=22,
@@ -140,8 +142,11 @@ class EditarLegajoView(ft.Container):
         # =====================================
         # CONTENT
         # =====================================
+        # =====================================
+# CONTENT
+# =====================================
 
-        self.content = ft.Column(
+        contenido = ft.Column(
 
             expand=True,
 
@@ -166,7 +171,7 @@ class EditarLegajoView(ft.Container):
                             controls=[
 
                                 ft.Text(
-                                    "Editar Legajo",
+                                    "Editar",
                                     size=24,
                                     weight=ft.FontWeight.BOLD,
                                     color="#0F172A"
@@ -262,10 +267,6 @@ class EditarLegajoView(ft.Container):
 
                             ft.Divider(),
 
-                            # =====================================
-                            # FOOTER
-                            # =====================================
-
                             ft.Row(
 
                                 alignment=ft.MainAxisAlignment.END,
@@ -303,13 +304,31 @@ class EditarLegajoView(ft.Container):
             ],
         )
 
-    async def load(self, item =None):
+        # =====================================
+        # STACK FINAL
+        # =====================================
+
+        self.content = ft.Stack(
+
+            expand=True,
+
+            controls=[
+
+                contenido,
+
+                self.toast
+            ]
+        ) 
+        
+    async def load(self, legajo_id: None):
 
         self.limpiar()
 
         await self.cargar_categoria()
         await self.cargar_modalidad()
-
+   
+        item =  await self.obtener_legajo_by_id(legajo_id)
+    
         self.editar(item)
 
         #self.update()
@@ -411,13 +430,18 @@ class EditarLegajoView(ft.Container):
                 "telefono": self.txt_telefono.value
             }
 
-            ok = await self.api_crear(data)
+            ok = await self.api_editar(data)
 
             if ok:
-
-                self.lbl_mensaje.value = (
-                    "Se guardó correctamente"
+                await self.toast.show(
+                    self.page_ref,
+                     "Se guardó correctamente",
+                    "success"
                 )
+
+                #self.lbl_mensaje.value = (
+                #    "Se guardó correctamente"
+                #)
 
                 self.lbl_mensaje.color = "#15803D"
 
@@ -425,11 +449,11 @@ class EditarLegajoView(ft.Container):
 
                 self.page_ref.update()
 
-                await asyncio.sleep(1)
+                #await asyncio.sleep(1)
 
-                self.page_ref.layout.change_view(
-                    "legajos"
-                )
+               # self.page_ref.layout.change_view(
+               #     "legajos"
+               # )
 
         finally:
 
@@ -437,54 +461,23 @@ class EditarLegajoView(ft.Container):
 
             self.page_ref.update()
 
-    async def api_crear(self, data):
+    async def api_editar(self, data):
 
         token = settings.TOKEN
 
-        url = f"{settings.URL_BACKEND}/legajos"
+        url = f"{settings.URL_BACKEND}/legajos/{self.legajo_id}"
 
-        try:
+        async with httpx.AsyncClient() as client:
 
-            async with httpx.AsyncClient() as client:
-
-                response = await client.post(
-                    url,
-                    json=data,
-                    headers={
-                        "Authorization": f"Bearer {token}"
-                    }
-                )
-
-            if response.status_code in (200, 201):
-
-                return True
-
-            data = response.json()
-
-            self.lbl_mensaje.value = data.get(
-                "detail",
-                "Error desconocido"
+            response = await client.put(
+                url,
+                json=data,
+                headers={
+                    "Authorization": f"Bearer {token}"
+                }
             )
 
-            self.lbl_mensaje.color = "#DC2626"
-
-            self.lbl_mensaje.visible = True
-
-            self.page_ref.update()
-
-            return False
-
-        except Exception as ex:
-
-            self.lbl_mensaje.value = str(ex)
-
-            self.lbl_mensaje.color = "#DC2626"
-
-            self.lbl_mensaje.visible = True
-
-            self.page_ref.update()
-
-            return False
+        return response.status_code in (200, 201)
 
     async def cargar_categoria(self):
 
@@ -571,7 +564,6 @@ class EditarLegajoView(ft.Container):
     def editar(self, item):
 
         self.legajo_id = item["id"]
-
         self.txt_cuil.value = item["cuil"]
         self.txt_apellido.value = item["apellido"]
         self.txt_nombre.value = item["nombre"]
@@ -590,3 +582,39 @@ class EditarLegajoView(ft.Container):
         self.chk_activo.value = item["activo"]
 
         self.page_ref.update()
+    
+    async def obtener_legajo_by_id(self,legajo_id:int):
+        token = settings.TOKEN
+        url = f"{settings.URL_BACKEND}/legajos/{legajo_id}"
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                url,
+                headers={
+                    "Authorization": f"Bearer {token}"
+                }
+            )
+        if response.status_code != 200:
+            await self.toast.show(
+                    self.page_ref,
+                    f"Error API: {response.status_code}",
+                    "error"
+            )
+            return
+
+        data = response.json()
+
+        legajo = {
+                    "id" : data.get('id'),
+                    "cuil": data.get("cuil", 0),
+                    "apellido": data.get("apellido", ""),
+                    "nombre": data.get("nombre", ""),
+                    "sexo": data.get("sexo",""),
+                    "categoria_id": data.get("categoria_id"),
+                    "modalidad_liquidacion_id":  data.get("modalidad_liquidacion_id"),
+                    "telefono": data.get("telefono", ""),
+                    "activo": data.get("activo", True),
+                    "sac":  data.get("sac", False),
+                }
+   
+        return legajo
+ 

@@ -3,7 +3,7 @@ from components.sidebar import Sidebar
 from views.legajos.gestion.gestion_layout import GestionLegajoLayout
 from views.legajos.legajo_list_view import LegajosView
 from views.legajos.legajo_crear_view import CrearLegajoView
-from views.dashboard import dashboard_view
+from views.dashboard.dashboard_view import DashboardView
 
 class Layout:
 
@@ -26,28 +26,7 @@ class Layout:
         # =========================
 
         self.views = {
-
-            "dashboard": ft.Container(
-
-                expand=True,
-
-                content=ft.Column(
-
-                    controls=[
-
-                        ft.Text(
-                            "Dashboard",
-                            size=32,
-                            weight=ft.FontWeight.BOLD
-                        ),
-
-                        ft.Text(
-                            "Bienvenido al sistema",
-                            color="grey"
-                        )
-                    ]
-                )
-            ),
+            "dashboard" : DashboardView(page),
             "legajos": LegajosView(page),
             "crear_legajo": CrearLegajoView(page),
             "gestion_legajo": GestionLegajoLayout(page)
@@ -96,12 +75,11 @@ class Layout:
             # =========================
 
             if view_name == "dashboard":
-
-                if hasattr(vista, "listar_legajos"):
-
+                if hasattr(vista, "load"):
                     self.page.run_task(
-                        vista.listar_legajos
-                    )
+                        vista.load
+                )    
+               
 
             elif view_name == "legajos":
 

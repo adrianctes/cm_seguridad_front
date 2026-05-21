@@ -1,7 +1,7 @@
 import flet as ft
 
 
-class FamiliaresView(ft.Container):
+class NotasView(ft.Container):
 
     def __init__(self, page):
         super().__init__()
@@ -17,7 +17,7 @@ class FamiliaresView(ft.Container):
         self.content = ft.Column(
             spacing=10,
             controls=[
-                ft.Text("Familiares"),
+                ft.Text("Notas"),
                 self.lbl,
             ]
         )

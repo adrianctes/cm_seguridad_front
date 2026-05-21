@@ -1,7 +1,7 @@
 import flet as ft
 
 
-class FamiliaresView(ft.Container):
+class HistoriaView(ft.Container):
 
     def __init__(self, page):
         super().__init__()
@@ -17,12 +17,12 @@ class FamiliaresView(ft.Container):
         self.content = ft.Column(
             spacing=10,
             controls=[
-                ft.Text("Familiares"),
+                ft.Text("Historia laboral"),
                 self.lbl,
             ]
         )
 
-    async def load(self, legajo_id=None):
+    async def load(self,legajo_id=None):
 
         self.lbl.value = "Pagina en Contruccion"
 
